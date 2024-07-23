@@ -113,22 +113,16 @@ const Invoice = ({ sale }) => (
     <Page size="A4" style={styles.page}>
       <View style={styles.section}>
 
-        <Text style={styles.header}>Invoice: {sale.InvoiceCode}</Text>
-        <Text style={styles.subHeader}>Name: {sale.name}</Text>
-        <Text style={styles.subHeader}>Paid By: {sale.paidBy}</Text>
-        <Text style={styles.subHeader}>Date: {sale.date}</Text>
-        <Text style={styles.subHeader}>Status: {sale.free ? 'F.O.C' : 'CHARGED'}</Text>
-
-        <Image src="/images/logo-upl.png" style={styles.logo} />
+        <Image src="/images/cdf-logo.png" style={styles.logo} />
         <Text style={styles.header}>Tax Invoice</Text>
         <View style={styles.addressContainer}>
           <View>
-            <Text style={styles.addressText}>UPLIFTING FLORAL STUDIO</Text>
-            <Text style={styles.addressText}>MARASI DRIVE, BUSINESS BAY</Text>
-            <Text style={styles.addressText}>BUILDING: BB02, DUBAI</Text>
+            <Text style={styles.addressText}>CHATEAU DES FLEURS DMCC</Text>
+            <Text style={styles.addressText}>LAKE VIEW TOWER JUMEIRAH</Text>
+            <Text style={styles.addressText}>UNIT: CL12 DUBAI</Text>
           </View>
           <View>
-            <Text style={styles.addressText}>TRN: 100551507500003</Text>
+            <Text style={styles.addressText}>TRN: 04541999900003</Text>
             <Text style={styles.addressText}>Invoice No: {sale.InvoiceCode}</Text>
             <Text style={styles.addressText}>PreparedBy: {sale.preparedBy}</Text>
             <Text style={styles.addressText}>Date: {sale.date}</Text>
@@ -181,7 +175,7 @@ const Invoice = ({ sale }) => (
           </View>
         <View style={styles.footer}>
           <View style={styles.footnote}>
-          <Text>Website: uplifting.ae | Phone: +971542045427 | Email: info@floralshopuae.com</Text>
+          <Text>Website: chateaudesfleursuae.com | Phone: +971542045428 | Email: info@chateaudesfleursuae.com</Text>
           </View>
           <View style={styles.footnote}>
           <Text>This is a system Generated Invoice, it Requires No extra action</Text>
