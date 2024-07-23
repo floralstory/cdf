@@ -6,7 +6,7 @@ const {Transaction} = require('../models/product')
 
 const makeSale = asyncHandler(async(req, res)=> {
 
-        const uuid =()=> `UPLDXB_${uuidv4().substring(0, 6)}`
+        const uuid =()=> `CDFDXB_${uuidv4().substring(0, 6)}`
         const itemsTotal = req.body.products.reduce((total, item)=> {
           return total + (item.quantity * item.price)
         }, 0)
