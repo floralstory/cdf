@@ -111,8 +111,6 @@ const styles = StyleSheet.create({
 const Invoice = ({ sale }) => (
   <Document>
     <Page size="A4" style={styles.page}>
-      <View style={styles.section}>
-
         <Image src="/images/cdf-logo.png" style={styles.logo} />
         <Text style={styles.header}>Tax Invoice</Text>
         <View style={styles.addressContainer}>
