@@ -114,13 +114,22 @@ const uploadFileHandler = async(file)=>{
   let totalWithoutVat = 0;
 
 
-  const calculateSubTotal = () => {
+  /* const calculateSubTotal = () => {
     const itemsTotalWithVat = products.reduce((accumulator, product) => accumulator + (product.quantity * product.price), 0);
     const itemsTotal = itemsTotalWithVat / (1 + (5 / 100)); // Calculate total without VAT
     const subTotal = round2(itemsTotal - discount); // Calculate subtotal after discount
     totalWithoutVat = subTotal; // Store subtotal in totalWithoutVat variable
     return subTotal;
-  };
+  }; */
+
+  const calculateSubTotal =()=> {
+    const itemsTotalWithVat = products.reduce((accumulator, product) => accumulator + (product.quantity * product.price), 0);
+    let subTotal = itemsTotalWithVat
+    if(discount){
+      subTotal -= discount
+    }
+    return totalWithoutVat = subTotal / 1.05
+  }
 
   const calculateVat = () => {
     const vat = round2(totalWithoutVat * (5 / 100))

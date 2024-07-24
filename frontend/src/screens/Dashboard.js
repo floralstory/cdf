@@ -38,42 +38,42 @@ export default function Dashboard() {
         <Col sm={2} md={2}>
             <Nav justify-variant='tabs' className='dashboard-nav'>
               <h3>{newDate()}</h3>
-                <Nav.Item onClick={handleSideBarClick('inventory')}>
+                <Nav.Item onClick={handleSideBarClick('inventory')} className="dashboard-icons">
                     <Nav.Link className='nav-link'>
                       <span><BsFillFileEarmarkBarGraphFill/></span> See Inventory
                     </Nav.Link>
                 </Nav.Item>
-            <Nav.Item onClick={handleSideBarClick('records')}>
+            <Nav.Item onClick={handleSideBarClick('records')} className="dashboard-icons">
                     <Nav.Link className='nav-link'>
                       <span><BsFillDeviceHddFill/></span> Sales History
                     </Nav.Link>
                 </Nav.Item>
-                <Nav.Item onClick={handleSideBarClick('new-product')}>
+                <Nav.Item onClick={handleSideBarClick('new-product')} className="dashboard-icons">
                     <Nav.Link className='nav-link'>
                     <span><BsFillDatabaseFill/></span>    Add product
                     </Nav.Link>
                 </Nav.Item>
-                <Nav.Item onClick={handleSideBarClick('make-sale')}>
+                <Nav.Item onClick={handleSideBarClick('make-sale')} className="dashboard-icons">
                     <Nav.Link className='nav-link'>
                       <span><BsFillCreditCardFill/></span>  Make Sale
                     </Nav.Link>
                 </Nav.Item>
-                <Nav.Item onClick={handleSideBarClick('mass-records')}>
+                <Nav.Item onClick={handleSideBarClick('mass-records')} className="dashboard-icons">
                     <Nav.Link className='nav-link'>
                       <span><BsCloudsFill/></span>  Mass Records
                     </Nav.Link>
                 </Nav.Item>
-                <Nav.Item onClick={handleSideBarClick('new-user')}>
+                <Nav.Item onClick={handleSideBarClick('new-user')} className="dashboard-icons">
                     <Nav.Link className='nav-link'>
                        <span><BsFillPersonPlusFill/></span> New User
                     </Nav.Link>
                 </Nav.Item>
-                <Nav.Item onClick={handleSideBarClick('stockrecords')}>
+                <Nav.Item onClick={handleSideBarClick('stockrecords')} className="dashboard-icons">
                     <Nav.Link className='nav-link'>
                       <span><BsBuildingLock/></span> Stock Records
                     </Nav.Link>
                 </Nav.Item>
-                <Nav.Item onClick={handleSideBarClick('customers')}>
+                <Nav.Item onClick={handleSideBarClick('customers')} className="dashboard-icons">
                     <Nav.Link className='nav-link'>
                       <span><BsPeopleFill/></span> Customer Data
                     </Nav.Link>
@@ -83,17 +83,17 @@ export default function Dashboard() {
                       <span><BsFillInboxesFill /></span> Product Data
                     </Nav.Link>
                 </Nav.Item>
-                <Nav.Item onClick={handleSideBarClick('sales')}>
+                <Nav.Item onClick={handleSideBarClick('sales')} className="dashboard-icons">
                     <Nav.Link className='nav-link'>
                       <span><BsFillFolderSymlinkFill/></span> Sales Data
                     </Nav.Link>
                 </Nav.Item>
-                <Nav.Item onClick={handleSideBarClick('graphs')}>
+                <Nav.Item onClick={handleSideBarClick('graphs')} className="dashboard-icons">
                     <Nav.Link className='nav-link'>
                       <span><BsGraphUpArrow/></span> Graphs
                     </Nav.Link>
                 </Nav.Item>
-                <Nav.Item onClick={handleSideBarClick('reports')}>
+                <Nav.Item onClick={handleSideBarClick('reports')} className="dashboard-icons">
                     <Nav.Link className='nav-link'>
                       <span><BsPieChartFill/></span> Daily Report
                     </Nav.Link>
