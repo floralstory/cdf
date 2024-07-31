@@ -4,7 +4,6 @@ const stockSchema = new mongoose.Schema({
     date: {type: String},
     products:[
         {
-            productId: {type: mongoose.Schema.Types.ObjectId, ref: "Product"},
             productName: {type: String},
             closingStock: {type: Number},
             sold: {type: Number},

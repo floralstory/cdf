@@ -10,65 +10,65 @@ Product.schema.virtual("nextWasteResetTime").get(function () {
 
 const getstockSnapShot = async () => {
     try {
-      const products = await Product.find({
-        $or: [
-          { closingStock: { $ne: null }},
-          { inStock: { $ne: null }},
-          { waste: { $ne: null }},
-          { purchase: { $ne: null }},
-        ]
-      });
-  
-      // Initialize variables to calculate total values for the stock record
-      let totalClosingStock = 0;
-      let totalDamages = 0;
-      let totalSold = 0;
-      const productDetails = [];
-  
-    for (const pdct of products) {
-        
-      const waste = pdct.waste || 0;
-      const sold = pdct.sold || 0;
-      const purchasePrice = pdct.purchasePrice || 0;
+      const [products] = await Product.aggregate([
+        {
+          $match: {
+            $or: [
+              { sold: { $gt: 0 }},
+              { inStock: { $gt: 0 }},
+              { waste: { $gt: 0 }},
+              { purchase: { $gt: 0 }},
+            ]
+          },
+        },
+        {
+          $group:{
+            _id: null,
+            products:{
+              $push:{
+                name: "$name",
+                purchase: "$purchase",
+                sold: "$sold",
+                waste:"$waste",
+                inStock:"$inStock"
+              }
+            },
 
-      //console.log(`Product: ${pdct.name}, Waste: ${waste}, Sold: ${sold}, Purchase Price: ${purchasePrice}`);
-
-      totalDamages += waste * purchasePrice;
-      totalSold += sold * purchasePrice;
-
-      const productTotalValue = pdct.closingStock * purchasePrice;
-      // Aggregate total closing stock, damages, and sold
-      totalClosingStock += productTotalValue;
+            totalPurchase: {$sum: {$multiply: ["$purchase", "$purchasePrice"]}},
+            totalSold: {$sum: {$multiply: ["$sold", "$purchasePrice"]}},
+            totalWaste: {$sum: {$multiply: ["$waste", "$purchasePrice"]}},
+            totalClosingStock: {$sum: {$multiply: ["$inStock", "$purchasePrice"]}},
+          }
+        },
+        {
+          $project:{
+            _id: 0,
+            products: 1,
+            totalPurchase: 1,
+            totalSold: 1,
+            totalWaste: 1,
+            totalClosingStock: 1 
+          }
+        }
+      ]);
   
-        // Create a separate object for product details to avoid modifying the original function
-        const productDetailObject = {
-          productId: pdct._id,
-          productName: pdct.name,
-          closingStock: pdct.closingStock,
-          sold: pdct.sold,
-          purchase: pdct.purchase,
-          damaged: pdct.waste,
-          price: pdct.purchasePrice,
-          Total: productTotalValue,
-        };
-  
-        // Push the product details object to the array
-        productDetails.push(productDetailObject);
+      if (!products) {
+        console.error('No products found for the snapshot.');
+        return;
       }
-  
+      
       // Create a single stock record for the entire collection with individual product details
       const stockRecord = new StockRecord({
         date: new Date().toISOString(),
-        products: productDetails,
-        closingStockvalue: totalClosingStock,
-        TotalDamagesvalue: totalDamages,
-        TotalSoldvalue: totalSold,
+        products: products.products,
+        closingStockvalue: products.totalClosingStock,
+        TotalDamagesvalue: products.totalWaste,
+        totalPurchase: products.totalPurchase,
+        TotalSoldvalue: products.totalSold,
       });
   
       // Save the stock record to the database
-      await stockRecord.save();
-  
-      console.log('Stock snapshot recorded successfully.');
+      await stockRecord.save();  
     } catch (error) {
       console.error('Error recording stock snapshot:', error.message);
     }
