@@ -3,6 +3,7 @@ const asyncHandler = require('express-async-handler')
 const { Transaction, Product} = require('../models/product');
 const Purchase = require('../models/Purchase');
 const SaleDetails = require('../models/saleDetails');
+const StockRecord = require('../models/StockRecord');
 
 
 
@@ -117,48 +118,64 @@ const dailyReport = asyncHandler(async(req, res)=> {
             console.log(error)
         }
     }else if(type === 'closing'){
-        const data = await Product.aggregate([
+      try{
+        let today = new Date().toISOString().split('T')[0]
+        let data;
+        if(today === date){
+          data = await Product.aggregate([
             {
-              $match: {
-                $or: [
-                  { inStock: { $gt: 0 } },
-                  { purchase: { $gt: 0 } },
-                  { waste: { $gt: 0 } },
-                  { sold: { $gt: 0 } }
-                ]
+                $match: {
+                  $or: [
+                    { inStock: { $gt: 0 } },
+                    { purchase: { $gt: 0 } },
+                    { waste: { $gt: 0 } },
+                    { sold: { $gt: 0 } }
+                  ]
+                }
+              },
+              {
+                $group: {
+                  _id: null,
+                  products: {
+                    $push: {
+                      name: "$name",
+                      purchase: "$purchase",
+                      sold: "$sold",
+                      waste: "$waste",
+                      closingStock: "$closingStock"
+                    }
+                  },
+                  totalPurchase: { $sum: { $multiply: ["$purchase", "$purchasePrice"] } },
+                  totalSold: { $sum: { $multiply: ["$sold", "$purchasePrice"] } },
+                  totalWaste: { $sum: { $multiply: ["$waste", "$purchasePrice"] } },
+                  totalClosingStock: { $sum: { $multiply: ["$closingStock", "$purchasePrice"] } }
+                }
+              },
+              {
+                $project: {
+                  _id: 0,
+                  products: 1,
+                  totalPurchase: 1,
+                  totalSold: 1,
+                  totalWaste: 1,
+                  totalClosingStock: 1
+                }
               }
-            },
-            {
-              $group: {
-                _id: null,
-                products: {
-                  $push: {
-                    name: "$name",
-                    purchase: "$purchase",
-                    sold: "$sold",
-                    waste: "$waste",
-                    closingStock: "$closingStock"
-                  }
-                },
-                totalPurchase: { $sum: { $multiply: ["$purchase", "$purchasePrice"] } },
-                totalSold: { $sum: { $multiply: ["$sold", "$purchasePrice"] } },
-                totalWaste: { $sum: { $multiply: ["$waste", "$purchasePrice"] } },
-                totalClosingStock: { $sum: { $multiply: ["$closingStock", "$purchasePrice"] } }
-              }
-            },
-            {
-              $project: {
-                _id: 0,
-                products: 1,
-                totalPurchase: 1,
-                totalSold: 1,
-                totalWaste: 1,
-                totalClosingStock: 1
-              }
-            }
-          ]);
+            ]);
+        }else{
+          const startOfDay = new Date().toISOString().split('T')[0] + 'T00:00:00.000Z'; // Start of today
+          const endOfDay = new Date(new Date().setHours(23, 59, 59, 999)).toISOString();
+          data = await StockRecord.findOne({
+            $gte: startOfDay,
+            $lte: endOfDay
+          })
+        }
+        //console.log(data)
+        res.send(data)
+        }catch(error){
+          res.send(error)
+        }
           
-        res.send(data);          
     }else if(type === 'sales'){
         try{
             const data = await Transaction.find({

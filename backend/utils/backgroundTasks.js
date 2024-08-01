@@ -26,11 +26,11 @@ const getstockSnapShot = async () => {
             _id: null,
             products:{
               $push:{
-                name: "$name",
+                productName: "$name",
                 purchase: "$purchase",
                 sold: "$sold",
-                waste:"$waste",
-                inStock:"$inStock"
+                damaged:"$waste",
+                closingStock:"$inStock"
               }
             },
 
@@ -69,6 +69,7 @@ const getstockSnapShot = async () => {
   
       // Save the stock record to the database
       await stockRecord.save();  
+      console.log('snapshot taken')
     } catch (error) {
       console.error('Error recording stock snapshot:', error.message);
     }
@@ -92,7 +93,8 @@ const resetWasteValues = async()=> {
 
   const backgroundTasks={
     start: ()=> {
-      cronJob.schedule('0 0 * * * ', getstockSnapShot);
+      cronJob.schedule('55 23 * * * ', getstockSnapShot);
+      //setTimeout(getstockSnapShot, 10000)
       cronJob.schedule('10 0 * * * ', resetWasteValues)
     }
   }
