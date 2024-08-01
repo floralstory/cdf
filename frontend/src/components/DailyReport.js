@@ -142,19 +142,19 @@ const TableTemplate = ({ type, data }) => {
               <React.Fragment key={index}>
                 {row.products?.map((product, idx) => (
                   <tr key={`${index}-${idx}`}>
-                    <td>{product.name || product.productName || 0}</td>
-                    <td>{product.purchase || 0}</td>
-                    <td>{product.sold || 0}</td>
-                    <td>{product.waste || product.damaged || 0}</td>
-                    <td>{product.closingStock || 0}</td>
+                    <td>{product.name || product.productName || ''}</td>
+                    <td>{product.purchase || ''}</td>
+                    <td>{product.sold || ''}</td>
+                    <td>{product.waste || product.damaged || ''}</td>
+                    <td>{product.closingStock || ''}</td>
                   </tr>
                 ))}
                 <tr>
                   <td><strong>Total Amount: (AED)</strong></td>
                   <td><strong>{row.totalPurchase || 0}</strong></td>
-                  <td><strong>{row.totalSold || row.TotalSoldValue}</strong></td>
-                  <td><strong>{row.totalWaste || row.TotalDamagesValue}</strong></td>
-                  <td><strong>{row.totalClosingStock || row.closingStockValue}</strong></td>
+                  <td><strong>{row.totalSold || row.TotalSoldValue || 0}</strong></td>
+                  <td><strong>{row.totalWaste || row.TotalDamagesValue || 0}</strong></td>
+                  <td><strong>{row.totalClosingStock || row.closingStockValue || 0}</strong></td>
                 </tr>
               </React.Fragment>
             ))}
