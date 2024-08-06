@@ -163,12 +163,17 @@ const dailyReport = asyncHandler(async(req, res)=> {
               }
             ]);
         }else{
-          const startOfDay = new Date().toISOString().split('T')[0] + 'T00:00:00.000Z'; // Start of today
-          const endOfDay = new Date(new Date().setHours(23, 59, 59, 999)).toISOString();
+          const startOfDay = new Date(date);
+          startOfDay.setHours(0, 0, 0, 0);
+          const endOfDay = new Date(date);
+          endOfDay.setHours(23, 59, 59, 999);
+
           data = await StockRecord.findOne({
+          createdAt: {
             $gte: startOfDay,
             $lte: endOfDay
-          })
+          }
+        });
         }
         //console.log(data)
         res.send(data)

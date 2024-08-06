@@ -13,9 +13,10 @@ const stockSchema = new mongoose.Schema({
             Total: {type: Number}
         }
     ],
-    closingStockvalue: {type: Number},
-    TotalDamagesvalue: {type: Number},
-    TotalSoldvalue: {type: Number}
+    closingStockvalue: {type: Number, default: 0},
+    totalPurchase: {type: Number}, default: 0,
+    TotalDamagesvalue: {type: Number, default: 0},
+    TotalSoldvalue: {type: Number, default: 0}
 },{
     timestamps: true
 })

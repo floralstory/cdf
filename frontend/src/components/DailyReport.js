@@ -152,9 +152,9 @@ const TableTemplate = ({ type, data }) => {
                 <tr>
                   <td><strong>Total Amount: (AED)</strong></td>
                   <td><strong>{row.totalPurchase || 0}</strong></td>
-                  <td><strong>{row.totalSold || row.TotalSoldValue || 0}</strong></td>
-                  <td><strong>{row.totalWaste || row.TotalDamagesValue || 0}</strong></td>
-                  <td><strong>{row.totalClosingStock || row.closingStockValue || 0}</strong></td>
+                  <td><strong>{row.totalSold || row.TotalSoldvalue || 0}</strong></td>
+                  <td><strong>{row.totalWaste || row.TotalDamagesvalue || 0}</strong></td>
+                  <td><strong>{row.totalClosingStock || row.closingStockvalue || 0}</strong></td>
                 </tr>
               </React.Fragment>
             ))}

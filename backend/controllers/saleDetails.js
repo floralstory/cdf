@@ -251,7 +251,7 @@ const querySalesData = asyncHandler(async(req, res) => {
             {
               $group: {
                 _id: null,
-                total: { $sum: { $ifNull: ["$subTotal", 0] } } // Sum up the total value of sales
+                total: { $sum: { $ifNull: ["$total", 0] } } // Sum up the total value of sales
               }
             }
           ],
@@ -260,7 +260,7 @@ const querySalesData = asyncHandler(async(req, res) => {
             {
               $group: {
                 _id: null,
-                total: { $sum: { $ifNull: ["$subTotal", 0] } } // Sum up the value of free sales
+                total: { $sum: { $ifNull: ["$total", 0] } } // Sum up the value of free sales
               }
             }
           ],
@@ -268,7 +268,7 @@ const querySalesData = asyncHandler(async(req, res) => {
             {
               $group: {
                 _id: "$paidBy",
-                total: { $sum: { $ifNull: ["$subTotal", 0] } }
+                total: { $sum: { $ifNull: ["$total", 0] } }
               }
             },
             {

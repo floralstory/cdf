@@ -74,8 +74,8 @@ const getStockRecord = asyncHandler(async(req, res)=> {
                 $lt: endDate,
             }
         });
-
-        res.send(data);
+        console.log(typeof(data))
+        //res.send(data);
         //console.log(record);
     } catch (error) {
         console.error(error);
