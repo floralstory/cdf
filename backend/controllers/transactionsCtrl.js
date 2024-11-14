@@ -46,61 +46,99 @@ const queryRecords = asyncHandler(async(req, res)=> {
 })
 
 const visualizeTransactions = asyncHandler(async (req, res) => {
-    try {
-        const { startDate, endDate, type } = req.query;
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        const results = [];
-
-        // Loop through each day within the date range
-        for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
-            const nextDay = new Date(date);
-            nextDay.setDate(nextDay.getDate() + 1);
-
-            let match = {
-                createdAt: {
-                    $gte: date,
-                    $lt: nextDay,
-                },
-            };
-
-            // If a specific type is passed, add type to the match condition
-            if (type) {
-                match.type = type;
-            }
-
-            const transactions = await Transaction.aggregate([
-                {
-                    $match: match,
-                },
-                {
-                    $group: {
-                        _id: '$type',
-                        totalQuantity: { $sum: '$quantity' },
-                        totalPrice: { $sum: { $multiply: ['$quantity', '$purchasePrice'] } },
-                    },
-                },
-            ]);
-
-            // Push the aggregated transactions for the day to the results array
-            results.push({ date: date.toISOString().split('T')[0], transactions });
+  try {
+    const data = await Transaction.aggregate([
+      {
+        // Extract year and month from the createdAt date field
+        $addFields: {
+          year: { $year: "$createdAt" },
+          month: { $month: "$createdAt" } // Add month field
         }
+      },
+      {
+        // Group by year, month, and type, calculate totals for purchase, sale, and damage
+        $group: {
+          _id: { year: "$year", month: "$month", type: "$type" },
+          totalPurchase: {
+            $sum: {
+              $cond: [
+                { $in: ["$type", ["purchase", "damage"]] }, 
+                { $multiply: ["$purchasePrice", "$quantity"] }, // For purchase and damage
+                0
+              ]
+            }
+          },
+          totalSales: {
+            $sum: {
+              $cond: [
+                { $eq: ["$type", "sale"] },
+                { $multiply: ["$sellingPrice", "$quantity"] }, // For sale
+                0
+              ]
+            }
+          },
+          totalQuantity: { $sum: "$quantity" }
+        }
+      },
+      {
+        // Shape the final data output
+        $project: {
+          year: "$_id.year",
+          month: "$_id.month",
+          type: "$_id.type",
+          totalPurchase: 1,
+          totalSales: 1,
+          totalQuantity: 1,
+          _id: 0
+        }
+      },
+      { $sort: { year: 1, month: 1 } } // Sort by year and month
+    ]);
 
-        // Extract unique types from transactions
-        const typesSet = new Set();
-        results.forEach(({ transactions }) => {
-            transactions.forEach(({ _id }) => {
-                typesSet.add(_id);
-            });
-        });
-        const types = Array.from(typesSet);
+    // Organize the data for each type by year and month
+    const aggregatedData = data.reduce((acc, item) => {
+      const { year, month, type, totalPurchase, totalSales } = item;
 
-        res.json({ results, types });
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        res.status(500).json({ message: 'Server Error' });
-    }
+      if (!acc[year]) acc[year] = {}; // Create year if not exists
+      if (!acc[year][month]) acc[year][month] = { purchase: 0, damage: 0, sale: 0 }; // Create month if not exists
+
+      // Add totals based on the type
+      if (type === 'purchase') {
+        acc[year][month].purchase += totalPurchase;
+      } else if (type === 'damage') {
+        acc[year][month].damage += totalPurchase; // Add to damage if type is 'damage'
+      } else if (type === 'sale') {
+        acc[year][month].sale += totalSales;
+      }
+
+      return acc;
+    }, {});
+
+    // Convert the data into a suitable format for charting
+    const chartData = Object.keys(aggregatedData).map(year => {
+      return Object.keys(aggregatedData[year]).map(month => {
+        return {
+          year,
+          month,
+          purchase: aggregatedData[year][month].purchase,
+          damage: aggregatedData[year][month].damage,
+          sale: aggregatedData[year][month].sale
+        };
+      });
+    }).flat(); // Flatten array for easy processing
+
+    res.status(200).json(chartData); // Return the data
+    //console.log(chartData); // Debugging output to check the result
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error in visualizing transactions' });
+  }
 });
+
+
+
+
+
 
 const dailyReport = asyncHandler(async(req, res)=> {
     const {date, type, } = req.query
