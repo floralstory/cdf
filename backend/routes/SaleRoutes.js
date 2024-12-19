@@ -81,7 +81,7 @@ SaleRouter.post(
                 subTotal: req.body.subTotal,
                 total: req.body.total,
                 vat: req.body.vat,
-                InvoiceCode: `UPLDXB_${ttSales + 1}`,
+                InvoiceCode: `CDFDXB_${ttSales + 1}`,
             })
         
             const sale = await newSale.save()
