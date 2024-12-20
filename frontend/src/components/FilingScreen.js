@@ -37,6 +37,7 @@ const [arrangement, setArrangement] = useState('')
 const [showSale, setShow] = useState({})
 const [purchase, setPurchase] = useState({})
 const [newTotal, setNewTotal] = useState(0)
+const [loading, setLoading] = useState(false);
 
 
 
@@ -45,13 +46,15 @@ useEffect(() => {
       (async()=> {
         setInvoices(todaySales || [])
         const storedSale = await JSON.parse(localStorage.getItem('selectedSale'))
-        if(storedSale){
-        setSelectedSale(storedSale)
-      }
+        if (storedSale && !selectedSale._id) {
+          setSelectedSale(storedSale);
+        }
     })()
     }
-  }, [recordType, selectedItems, invoices, selectedSale, todaySales]);
+  }, [recordType, todaySales]);
 
+
+  /* [recordType, selectedItems, invoices, selectedSale, todaySales] */
 
   const getPurchase = async(e)=>{
     if(deliveryNote !== ''){
@@ -82,7 +85,7 @@ useEffect(() => {
     product: item._id,
     productName: item.name,
     purchasePrice: item.purchasePrice,
-    quantity: itemQuantities[item._id] || 0 // Access quantity for each item using item._id as key
+    quantity: itemQuantities[item._id] || 0 
   }));
   const calculateTotal=(products)=>{
     return products.reduce((total, product)=> {
@@ -92,6 +95,8 @@ useEffect(() => {
   }
 
 const handleSubmit =async()=>{
+  if (loading) return; // Prevent submitting while loading
+  setLoading(true);
     switch(recordType){
         case "purchase":
             try{
@@ -152,7 +157,7 @@ const handleSubmit =async()=>{
             }
             break;
         default:
-            return
+            break
             //console.log('unknown Action')
     }
 }
