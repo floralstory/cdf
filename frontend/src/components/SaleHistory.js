@@ -28,7 +28,7 @@ export default function SaleHistory() {
     
     
     const addSale = async(saleId)=>{
-        const {data} = await axios.get(`/api/multiple/get-sale/${saleId}`)
+        const {data} = await axios.get(`/api/sale/get-sale/${saleId}`)
         localStorage.setItem('selectedSale', JSON.stringify(data))
         //ctxDispatch({type: "ADD_SELECTED_SALE", payload: data})
         toast.success('sale attched successfully')
@@ -37,7 +37,7 @@ export default function SaleHistory() {
    
     const handleViewSale = async (saleId)=> {
        try{
-        const result = await axios.get(`/api/multiple/get-sale/${saleId}`)
+        const result = await axios.get(`/api/sale/get-sale/${saleId}`)
         setSelectedSale(result.data)
         setShowModal(true)
        } catch(error){
@@ -46,7 +46,7 @@ export default function SaleHistory() {
     }
 
     const handleSearch = async()=>{
-        const {data} = await axios.get(`/api/multiple/search?searchText=${searchText}`)
+        const {data} = await axios.get(`/api/sale/search?searchText=${searchText}`)
         setData(data) 
     }
 

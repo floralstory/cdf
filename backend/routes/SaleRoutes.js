@@ -269,16 +269,20 @@ SaleRouter.get(
             const { day, month, year } = req.query;
             let dateRegex;
             
-            if (year) {
-              dateRegex = `.*${year}`;
-            }
-            
-            if (month && day) {
-              dateRegex = `^${day}/${month}/`;
-            } else if (month) {
-              dateRegex = `^\\d{2}/${month}/`;
-            } else if (day) {
-              dateRegex = `^${day}/\\d{2}/`;
+            try {
+              if (year) {
+                dateRegex = `.*${year}`;
+              }
+              
+              if (month && day) {
+                dateRegex = `^${day}/${month}/`;
+              } else if (month) {
+                dateRegex = `^\\d{2}/${month}/`;
+              } else if (day) {
+                dateRegex = `^${day}/\\d{2}/`;
+              }
+            } catch (error) {
+              console.log(error)
             }
           
             try {

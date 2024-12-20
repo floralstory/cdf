@@ -15,7 +15,7 @@ TransactionRouter.post(
             try{
                 const {selectedProducts, deliveryNote, total} = req.body
         
-        
+       
                 const newPurchase = new Purchase({
                     deliveryNote: deliveryNote,
                     Items: selectedProducts,
@@ -190,7 +190,7 @@ TransactionRouter.get(
                     const data = await Purchase.find({
                         createdAt: {
                           $gte: new Date(date),
-                          $lt: new Date(date + 'T23:59:59.999Z') //full day hours
+                          $lt: new Date(date + 'T23:59:59.999Z')
                         }
                     });
                     res.send(data)
@@ -356,6 +356,7 @@ TransactionRouter.get(
                     });
                 });
                 const types = Array.from(typesSet);
+                console.log(types, results)
         
                 res.json({ results, types });
             } catch (error) {

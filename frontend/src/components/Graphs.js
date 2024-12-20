@@ -8,11 +8,12 @@ export default function Graphs() {
   // Function to fetch data
   const getData = async () => {
     try {
-      const { data } = await axios.get('/api/transactions/visualize'); // Fetch data from backend
+      const { data } = await axios.get('/api/transactions/visualize');
+      console.log(data)
       const formattedData = [
-        ['Year-Month', 'Purchase', 'Damage', 'Sale'], // Column headers: Year-Month, Purchase, Damage, Sale
+        ['Year-Month', 'Purchase', 'Damage', 'Sale'],
         ...data.map(item => [
-          `${item.year}-${item.month < 10 ? '0' + item.month : item.month}`, // Format as YYYY-MM
+          `${item.year}-${item.month < 10 ? '0' + item.month : item.month}`,
           item.purchase,
           item.damage,
           item.sale
@@ -26,8 +27,8 @@ export default function Graphs() {
   };
 
   useEffect(() => {
-    getData(); // Fetch data on component mount
-  }, []); // Empty dependency array ensures it runs only once
+    getData();
+  }, []); 
 
   return (
     <div>

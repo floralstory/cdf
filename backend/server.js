@@ -5,12 +5,12 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import userRouter from './routes/userRouter.js';
-import saleDetailsRouter from './routes/SaleRoutes.js';
 import ProductRouter from './routes/ProductRoutes.js';
 import backgroundTasks from './utils/backgroundTasks.js';
 import TransactionRouter from './routes/transactionRoutes.js';
 import { ErrorHandler, UploadRouter } from './Helpers.js';
 import { fileURLToPath } from 'url';
+import SaleRouter from './routes/SaleRoutes.js';
 
 const app = express();
 dotenv.config()
@@ -30,7 +30,7 @@ app.use(bodyParser.json())
 //routes middleware
 app.use('/api/product', ProductRouter)
 app.use('/api/user', userRouter)
-app.use('/api/multiple', saleDetailsRouter)
+app.use('/api/sale', SaleRouter)
 app.use('/api/upload', UploadRouter)
 app.use('/api/transactions', TransactionRouter)
 

@@ -158,7 +158,7 @@ if(hasNullValues){
 
     try{
         
-        const response = await axios.post('/api/multiple/new-sale', {
+        const response = await axios.post('/api/sale/new-sale', {
         products, discount,
         paidBy, driver,
         service, recievedBy,

@@ -70,7 +70,7 @@ useEffect(() => {
 
   const handleViewSale = async (saleId)=> {
     try{
-     const result = await axios.get(`/api/multiple/get-sale/${saleId}`)
+     const result = await axios.get(`/api/sale/get-sale/${saleId}`)
      setShow(result.data)
      setShowModal(true)
     } catch(error){
@@ -112,7 +112,7 @@ const handleSubmit =async()=>{
             break;
         case "sale":
             try{
-                await axios.post(`/api/multiple/${selectedSale._id}/add-units`, {
+                await axios.post(`/api/sale/${selectedSale._id}/add-units`, {
                     selectedProducts,
                     unitName: arrangement
                 })

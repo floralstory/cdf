@@ -37,7 +37,7 @@ export default function QuerySalesData(){
   const fetchSales = async () => {
     if (Object.keys(query).length > 0) {
       try {
-        const response = await axios.get('/api/multiple/for', { params: query });
+        const response = await axios.get('/api/sale/for', { params: query });
         setSales(response.data.sales);
         setTotalCount(response.data.totalCount);
         setTotalValue(response.data.totalValue);
@@ -52,7 +52,7 @@ export default function QuerySalesData(){
   // Function to handle viewing sale details
   const handleViewSale = async (saleId) => {
     try {
-      const result = await axios.get(`/api/multiple/get-sale/${saleId}`);
+      const result = await axios.get(`/api/sale/get-sale/${saleId}`);
       setSelectedSale(result.data);
       setShowModal(true);
     } catch(error) {
@@ -76,7 +76,7 @@ export default function QuerySalesData(){
   // Function to update sale details
   const updateSale = async () => {
     try {
-      await axios.put(`/api/multiple/edit/${editingSale._id}`, {
+      await axios.put(`/api/sale/edit/${editingSale._id}`, {
         time: date.toLocaleDateString(),
         service: service,
         paidBy: paidBy

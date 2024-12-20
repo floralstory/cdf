@@ -30,7 +30,7 @@ function App() {
 
   useEffect(()=> {
     const getTodaySales = async()=>{
-      const {data} = await axios.get('/api/multiple/today-sales')
+      const {data} = await axios.get('/api/sale/today-sales')
       console.log(data)
       localStorage.setItem('todaySales', JSON.stringify(data))
     }
