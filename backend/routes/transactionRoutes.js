@@ -61,25 +61,6 @@ TransactionRouter.post(
     )
 )
 
-TransactionRouter.get(
-    '/:deliveryNote',
-    expressAsyncHandler(async(req, res)=> {
-        try{
-            const dbPurchase  = await Purchase.findOne({deliveryNote: req.params.deliveryNote})
-
-        if(!dbPurchase){
-            res.status(404).send({message:"Purchase not Found"})
-            return
-        }
-        res.status(200).send(dbPurchase)
-
-        }catch(error){
-            res.send(error)
-        }
-    })
-)
-
-
 
 ///UPDATE PURCHASE DATA
 TransactionRouter.put(
@@ -293,7 +274,7 @@ TransactionRouter.get(
                     const data = await Sale.find({
                         createdAt: {
                           $gte: new Date(date),
-                          $lt: new Date(date + 'T23:59:59.999Z') //full day hours
+                          $lt: new Date(date + 'T23:59:59.999Z')
                         }
                     });
                     res.send(data)
@@ -414,6 +395,25 @@ TransactionRouter.post(
         }
     )
 )
+
+TransactionRouter.get(
+    '/:deliveryNote',
+    expressAsyncHandler(async(req, res)=> {
+        try{
+            const dbPurchase  = await Purchase.findOne({deliveryNote: req.params.deliveryNote})
+
+        if(!dbPurchase){
+            res.status(404).send({message:"Purchase not Found"})
+            return
+        }
+        res.status(200).send(dbPurchase)
+
+        }catch(error){
+            res.send(error)
+        }
+    })
+)
+
 
 export default TransactionRouter
 

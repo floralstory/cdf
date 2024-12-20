@@ -8,7 +8,148 @@ import { Sale } from '../models/Transactions.js';
 
 const SaleRouter = express.Router()
 
-
+SaleRouter.get(
+  '/sales-data',
+  async(req, res)=> {
+      const salesData = await SaleDetails.aggregate([
+          {
+            $group: {
+              _id: {
+                year: { $year: { $dateFromString: { dateString: '$date' } } },
+                month: { $month: { $dateFromString: { dateString: '$date' } } },
+                day: { $dayOfMonth: { $dateFromString: { dateString: '$date' } } }
+              },
+              dailySales: { $push: '$$ROOT' }
+            }
+          },
+          {
+            $group: {
+              _id: {
+                year: '$_id.year',
+                month: '$_id.month'
+              },
+              monthlySales: { $push: '$$ROOT' },
+              monthlySummary: {
+                $push: {
+                  date: '$_id',
+                  totalSales: { $sum: '$dailySales.total' },
+                  numSales: { $size: '$dailySales' }
+                }
+              }
+            }
+          },
+          {
+            $group: {
+              _id: '$_id.year',
+              yearlySales: { $push: '$$ROOT' },
+              yearlySummary: {
+                $push: {
+                  year: '$_id',
+                  totalSales: { $sum: '$monthlySummary.totalSales' },
+                  numSales: { $sum: '$monthlySummary.numSales' }
+                }
+              }
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              period: '$_id',
+              dailySales: 1,
+              monthlySales: 1,
+              yearlySales: 1,
+              dailySummary: '$monthlySales.monthlySummary',
+              monthlySummary: 1,
+              yearlySummary: 1
+            }
+          }
+        ]);
+      res.send(salesData)
+  }
+)
+SaleRouter.get(
+  '/for',
+  expressAsyncHandler(
+      async(req, res) => {
+          const { day, month, year } = req.query;
+          let dateRegex;
+          
+          try {
+            if (year) {
+              dateRegex = `.*${year}`;
+            }
+            
+            if (month && day) {
+              dateRegex = `^${day}/${month}/`;
+            } else if (month) {
+              dateRegex = `^\\d{2}/${month}/`;
+            } else if (day) {
+              dateRegex = `^${day}/\\d{2}/`;
+            }
+          } catch (error) {
+            console.log(error)
+          }
+        
+          try {
+            const sales = await SaleDetails.aggregate([
+              {
+                $match: {
+                  date: { $regex: dateRegex }
+                }
+              },
+              {
+                $facet: {
+                  sales: [{ $match: {} }],
+                  totalCount: [{ $count: "count" }],
+                  totalValue: [
+                    {
+                      $group: {
+                        _id: null,
+                        total: { $sum: { $ifNull: ["$total", 0] } }
+                      }
+                    }
+                  ],
+                  focSales: [
+                    { $match: { free: true } },
+                    {
+                      $group: {
+                        _id: null,
+                        total: { $sum: { $ifNull: ["$total", 0] } }
+                      }
+                    }
+                  ],
+                  paymentTotals: [
+                    {
+                      $group: {
+                        _id: "$paidBy",
+                        total: { $sum: { $ifNull: ["$total", 0] } }
+                      }
+                    },
+                    {
+                      $project: {
+                        _id: 0,
+                        paymentMethod: "$_id",
+                        total: 1
+                      }
+                    }
+                  ]
+                }
+              }
+            ]);
+            
+            const totalCount = sales[0].totalCount[0]?.count || 0;
+            const totalValue = sales[0].totalValue[0]?.total || 0;
+            const focSales = sales[0].focSales[0]?.total || 0;
+            const paymentTotals = sales[0].paymentTotals || [];
+        
+            // Send the aggregated sales data as the response
+            res.status(200).send({ sales: sales[0].sales, totalCount, totalValue, focSales, paymentTotals });
+          } catch (error) {
+            res.status(500).send({ error: 'Unable to get results' });
+          }
+        }
+  )
+)
 SaleRouter.get(
     '/search',
     expressAsyncHandler(
@@ -203,148 +344,7 @@ SaleRouter.post(
         }
     )
 )
-SaleRouter.get(
-    '/sales-data',
-    async(req, res)=> {
-        const salesData = await SaleDetails.aggregate([
-            {
-              $group: {
-                _id: {
-                  year: { $year: { $dateFromString: { dateString: '$date' } } },
-                  month: { $month: { $dateFromString: { dateString: '$date' } } },
-                  day: { $dayOfMonth: { $dateFromString: { dateString: '$date' } } }
-                },
-                dailySales: { $push: '$$ROOT' }
-              }
-            },
-            {
-              $group: {
-                _id: {
-                  year: '$_id.year',
-                  month: '$_id.month'
-                },
-                monthlySales: { $push: '$$ROOT' },
-                monthlySummary: {
-                  $push: {
-                    date: '$_id',
-                    totalSales: { $sum: '$dailySales.total' },
-                    numSales: { $size: '$dailySales' }
-                  }
-                }
-              }
-            },
-            {
-              $group: {
-                _id: '$_id.year',
-                yearlySales: { $push: '$$ROOT' },
-                yearlySummary: {
-                  $push: {
-                    year: '$_id',
-                    totalSales: { $sum: '$monthlySummary.totalSales' },
-                    numSales: { $sum: '$monthlySummary.numSales' }
-                  }
-                }
-              }
-            },
-            {
-              $project: {
-                _id: 0,
-                period: '$_id',
-                dailySales: 1,
-                monthlySales: 1,
-                yearlySales: 1,
-                dailySummary: '$monthlySales.monthlySummary',
-                monthlySummary: 1,
-                yearlySummary: 1
-              }
-            }
-          ]);
-        res.send(salesData)
-    }
-)
-SaleRouter.get(
-    '/for',
-    expressAsyncHandler(
-        async(req, res) => {
-            const { day, month, year } = req.query;
-            let dateRegex;
-            
-            try {
-              if (year) {
-                dateRegex = `.*${year}`;
-              }
-              
-              if (month && day) {
-                dateRegex = `^${day}/${month}/`;
-              } else if (month) {
-                dateRegex = `^\\d{2}/${month}/`;
-              } else if (day) {
-                dateRegex = `^${day}/\\d{2}/`;
-              }
-            } catch (error) {
-              console.log(error)
-            }
-          
-            try {
-              const sales = await SaleDetails.aggregate([
-                {
-                  $match: {
-                    date: { $regex: dateRegex }
-                  }
-                },
-                {
-                  $facet: {
-                    sales: [{ $match: {} }],
-                    totalCount: [{ $count: "count" }],
-                    totalValue: [
-                      {
-                        $group: {
-                          _id: null,
-                          total: { $sum: { $ifNull: ["$total", 0] } }
-                        }
-                      }
-                    ],
-                    focSales: [
-                      { $match: { free: true } },
-                      {
-                        $group: {
-                          _id: null,
-                          total: { $sum: { $ifNull: ["$total", 0] } }
-                        }
-                      }
-                    ],
-                    paymentTotals: [
-                      {
-                        $group: {
-                          _id: "$paidBy",
-                          total: { $sum: { $ifNull: ["$total", 0] } }
-                        }
-                      },
-                      {
-                        $project: {
-                          _id: 0,
-                          paymentMethod: "$_id",
-                          total: 1
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]);
-              
-              const totalCount = sales[0].totalCount[0]?.count || 0;
-              const totalValue = sales[0].totalValue[0]?.total || 0;
-              const focSales = sales[0].focSales[0]?.total || 0;
-              const paymentTotals = sales[0].paymentTotals || [];
-          
-              // Send the aggregated sales data as the response
-              res.status(200).send({ sales: sales[0].sales, totalCount, totalValue, focSales, paymentTotals });
-            } catch (error) {
-              res.status(500).send({ error: 'Unable to get results' });
-            }
-          }
-    )
-)
+
 
 
 export default SaleRouter
