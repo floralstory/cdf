@@ -9,18 +9,8 @@ export default function Graphs() {
   const getData = async () => {
     try {
       const { data } = await axios.get('/api/transactions/visualize');
-      console.log(data)
-      const formattedData = [
-        ['Year-Month', 'Purchase', 'Damage', 'Sale'],
-        ...data.map(item => [
-          `${item.year}-${item.month < 10 ? '0' + item.month : item.month}`,
-          item.purchase,
-          item.damage,
-          item.sale
-        ])
-      ];
 
-      setChartData(formattedData); // Set formatted data to state
+    setChartData(data); 
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -44,13 +34,13 @@ export default function Graphs() {
           hAxis: { title: 'Time', format: 'yyyy-MM' }, // Format the x-axis as year-month
           vAxis: { title: 'Amount' },
           curveType: 'function',
-          lineWidth: 2,
+          lineWidth: 1,
           intervals: { style: 'bars' },
           explorer: {
             actions: ['dragToZoom', 'rightClickToReset'], // Enable zooming and right-click reset
             axis: 'horizontal', // Focus the explorer on the x-axis (time)
             keepInBounds: true, // Prevent the zoom from going out of bounds
-            maxZoomIn: 1.5, // Adjust zoom level if needed
+            maxZoomIn: 2, // Adjust zoom level if needed
           },
         }}
       />

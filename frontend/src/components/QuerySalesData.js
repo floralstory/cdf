@@ -31,7 +31,7 @@ export default function QuerySalesData(){
   const [editingSale, setEditingSale] = useState(null);
   const [paidBy,  setPaidBy]= useState('');
   const [service, setService]= useState('');
-  const [date, setDate] = useState(new Date()); // Initialize with current date
+  const [date, setDate] = useState(new Date());
 
   // Function to fetch sales data based on query parameters
   const fetchSales = async () => {

@@ -285,68 +285,102 @@ TransactionRouter.get(
         }
     )
 )
+
+
+const getLast12Months = () => {
+    const endDate = new Date(); // Today
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - 12); // 12 months ago
+    return { startDate, endDate };
+  };
+
 TransactionRouter.get(
     '/visualize',
-    expressAsyncHandler(
-        async (req, res) => {
-            try {
-                const { startDate, endDate, type } = req.query;
-                const start = new Date(startDate);
-                const end = new Date(endDate);
-                const results = [];
-        
-                // Loop through each day within the date range
-                for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
-                    const nextDay = new Date(date);
-                    nextDay.setDate(nextDay.getDate() + 1);
-        
-                    let match = {
-                        createdAt: {
-                            $gte: date,
-                            $lt: nextDay,
-                        },
-                    };
-        
-                    // If a specific type is passed, add type to the match condition
-                    if (type) {
-                        match.type = type;
-                    }
-        
-                    const transactions = await Transaction.aggregate([
-                        {
-                            $match: match,
-                        },
-                        {
-                            $group: {
-                                _id: '$type',
-                                totalQuantity: { $sum: '$quantity' },
-                                totalPrice: { $sum: { $multiply: ['$quantity', '$purchasePrice'] } },
-                            },
-                        },
-                    ]);
-        
-                    // Push the aggregated transactions for the day to the results array
-                    results.push({ date: date.toISOString().split('T')[0], transactions });
-                }
-        
-                // Extract unique types from transactions
-                const typesSet = new Set();
-                results.forEach(({ transactions }) => {
-                    transactions.forEach(({ _id }) => {
-                        typesSet.add(_id);
-                    });
-                });
-                const types = Array.from(typesSet);
-                console.log(types, results)
-        
-                res.json({ results, types });
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                res.status(500).json({ message: 'Server Error' });
-            }
+    expressAsyncHandler(async (req, res) => {
+        try {
+          // Get startDate and endDate from query params, or default to the past 12 months
+          let { startDate, endDate } = req.query;
+    
+          // If no dates are provided, use the last 12 months
+          if (!startDate || !endDate) {
+            const { startDate: defaultStartDate, endDate: defaultEndDate } = getLast12Months();
+            startDate = defaultStartDate.toISOString();  // Convert to ISO string
+            endDate = defaultEndDate.toISOString();      // Convert to ISO string
+          }
+    
+          // Convert to Date objects (MongoDB expects Date objects for comparisons)
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+    
+          // Perform aggregation
+          const results = await Transaction.aggregate([
+            {
+              $match: {
+                createdAt: { $gte: start, $lt: end },
+              },
+            },
+            {
+              $project: {
+                year: { $year: '$createdAt' },
+                month: { $month: '$createdAt' },
+                quantity: 1,
+                type: 1,
+                purchasePrice: 1,
+                sellingPrice: 1,
+              },
+            },
+            {
+              $group: {
+                _id: { year: '$year', month: '$month' },
+                totalPurchase: {
+                  $sum: {
+                    $cond: [{ $eq: ['$type', 'purchase'] }, '$quantity', 0],
+                  },
+                },
+                totalSale: {
+                  $sum: {
+                    $cond: [{ $eq: ['$type', 'sale'] }, '$quantity', 0],
+                  },
+                },
+                totalDamage: {
+                  $sum: {
+                    $cond: [{ $eq: ['$type', 'damage'] }, '$quantity', 0],
+                  },
+                },
+                totalReturned: {
+                  $sum: {
+                    $cond: [{ $eq: ['$type', 'returned'] }, '$quantity', 0],
+                  },
+                },
+              },
+            },
+            {
+              $sort: { '_id.year': 1, '_id.month': 1 },
+            },
+          ]);
+    
+          // Format the data for the client
+          const formattedData = [
+            ['Year-Month', 'Purchase', 'Sale', 'Damage', 'Returned'],
+            ...results.map(item => {
+              const date = `${item._id.year}-${item._id.month < 10 ? '0' + item._id.month : item._id.month}`;
+              return [
+                date,
+                item.totalPurchase,
+                item.totalSale,
+                item.totalDamage,
+                item.totalReturned,
+              ];
+            }),
+          ];
+    
+          res.json(formattedData);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+          res.status(500).json({ message: 'Server Error' });
         }
-    )
-)
+      })
+    );
 
 TransactionRouter.post(
     '/damages',
