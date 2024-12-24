@@ -11,7 +11,7 @@ const SaleRouter = express.Router()
 SaleRouter.get(
   '/sales-data',
   async(req, res)=> {
-      const salesData = await SaleDetails.aggregate([
+      const salesData = await Sale.aggregate([
           {
             $group: {
               _id: {
@@ -91,7 +91,7 @@ SaleRouter.get(
           }
         
           try {
-            const sales = await SaleDetails.aggregate([
+            const sales = await Sale.aggregate([
               {
                 $match: {
                   date: { $regex: dateRegex }
